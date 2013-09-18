@@ -66,7 +66,8 @@ public class Main extends JavaPlugin implements Listener{
 	
 	//TODO: Bugs
 	// [High] If everyone does /wither leave, sign doesnt get updated. (stays at "Ingame!")
-	
+	// fix idea: if last person does /wither leave, update sign
+	// if rightclick and noone in arena, update sign
 	
 	public static Economy econ = null;
 	public boolean economy = false;
@@ -211,6 +212,14 @@ public class Main extends JavaPlugin implements Listener{
                 	    	p2.getInventory().setContents(pinv.get(p2));
                 	    	p2.getInventory().setArmorContents(parmor.get(p2));
                 	    	p2.updateInventory();
+                	    	
+                	    	// no players in given arena anymore -> update sign
+                	    	Sign s = this.getSignFromArena(arena);
+                	    	if(!arenap.values().contains(arena)){
+                	    		s.setLine(2, "§2Join!");
+                	    		s.setLine(3, "0/3");
+                	    		s.update();
+                	    	}
     					}
     					//}
     				}else if(action.equalsIgnoreCase("list")){
@@ -314,8 +323,15 @@ public class Main extends JavaPlugin implements Listener{
             			s.update();
                 	}
                 	
+                	String arena = s.getLine(1);
+                	// no players in given arena anymore -> update sign
+        	    	if(!arenap.values().contains(arena)){
+        	    		s.setLine(2, "§2Join!");
+        	    		s.setLine(3, "0/3");
+        	    		s.update();
+        	    	}
+                	
                 	if(s.getLine(2).equalsIgnoreCase("§2Join!")){
-                		String arena = s.getLine(1);
                     	arena = arena.substring(2);
                     	Player p = event.getPlayer();
                     	int currentcount = Integer.parseInt(s.getLine(3).substring(0, 1));
