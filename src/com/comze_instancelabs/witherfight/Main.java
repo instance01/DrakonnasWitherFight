@@ -64,11 +64,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 public class Main extends JavaPlugin implements Listener{
 	
 	
-	//TODO: Bugs
-	// [High] If everyone does /wither leave, sign doesnt get updated. (stays at "Ingame!")
-	// fix idea: if last person does /wither leave, update sign
-	// if rightclick and noone in arena, update sign
-	
 	public static Economy econ = null;
 	public boolean economy = false;
 	
@@ -94,7 +89,7 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("config.auto_updating", true);
 		getConfig().addDefault("config.cooldown", 24);
 		
-		getConfig().addDefault("config.maxplayers", 1);
+		getConfig().addDefault("config.maxplayers", 3);
 		
 		getConfig().addDefault("strings.nopermission", "§4You don't have permission!");
 		getConfig().addDefault("strings.createcourse", "§2WitherFight saved. Now create a spawn and a lobby. :)");
@@ -144,7 +139,6 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
-		getLogger().info(cmd.getName());
 		if(cmd.getName().equalsIgnoreCase("wither")){
     		if(args.length < 1){
     			sender.sendMessage(getConfig().getString("strings.help1"));
@@ -217,7 +211,7 @@ public class Main extends JavaPlugin implements Listener{
                 	    	Sign s = this.getSignFromArena(arena);
                 	    	if(!arenap.values().contains(arena)){
                 	    		s.setLine(2, "§2Join!");
-                	    		s.setLine(3, "0/3");
+                	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
                 	    		s.update();
                 	    	}
     					}
@@ -319,15 +313,16 @@ public class Main extends JavaPlugin implements Listener{
                 	}
                 	if(update){
             			s.setLine(2, "§2Join!");
-            			s.setLine(3, "0/3");
+            			s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
             			s.update();
                 	}
                 	
                 	String arena = s.getLine(1);
+                	getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
                 	// no players in given arena anymore -> update sign
         	    	if(!arenap.values().contains(arena)){
         	    		s.setLine(2, "§2Join!");
-        	    		s.setLine(3, "0/3");
+        	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
         	    		s.update();
         	    	}
                 	
