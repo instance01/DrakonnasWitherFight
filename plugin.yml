@@ -1,0 +1,34 @@
+name: WitherFight
+main: com.comze_instancelabs.witherfight.Main
+version: 1.0
+author: instancelabs
+softdepend: [Vault]
+permissions:
+  wither.*:
+    description: Gives access to all maze commands.
+    children:
+      wither.sign: true
+      wither.create: true
+      wither.setspawn: true
+      wither.setlobby: true
+      wither.list: true
+      wither.reload: true
+      wither.remove: true
+  wither.sign:
+    description: Gives access to create signs for joining games.
+  wither.create:
+    description: Gives access to the creation of courses.
+  wither.setspawn:
+    description: Gives access to set the spawns.
+  wither.setlobby:
+    description: Gives access to set the lobby.
+  wither.remove:
+    description: Gives access to remove the course. 
+  wither.list:
+    description: Gives access to listing all courses. 
+  wither.reload:
+    description: Gives access to reloading the configuration. 
+commands:
+   wither:
+      description: Main command
+      usage: /maze [name]
