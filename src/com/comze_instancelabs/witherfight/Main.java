@@ -63,6 +63,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 public class Main extends JavaPlugin implements Listener{
 	
+	//TODO: Bugs
+	// [High][Not Proved] People may be able to join while a game is running?
 	
 	public static Economy econ = null;
 	public boolean economy = false;
@@ -74,7 +76,7 @@ public class Main extends JavaPlugin implements Listener{
 	static HashMap<Player, String> tpthem = new HashMap<Player, String>(); // playername -> arenaname
 	static HashMap<Player, ItemStack[]> pinv = new HashMap<Player, ItemStack[]>(); // player -> Inventory
 	static HashMap<Player, ItemStack[]> parmor = new HashMap<Player, ItemStack[]>(); // player -> Inventory
-
+	static HashMap<Player, Integer> xpp = new HashMap<Player, Integer>(); // player -> xp
 	
 	@Override
 	public void onEnable(){
@@ -207,12 +209,21 @@ public class Main extends JavaPlugin implements Listener{
                 	    	p2.getInventory().setArmorContents(parmor.get(p2));
                 	    	p2.updateInventory();
                 	    	
+                	    	p2.setLevel(xpp.get(p2));
+                	    	
                 	    	// no players in given arena anymore -> update sign
                 	    	Sign s = this.getSignFromArena(arena);
                 	    	if(!arenap.values().contains(arena)){
                 	    		s.setLine(2, "§2Join!");
                 	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
                 	    		s.update();
+                	    	}
+                	    	
+                	    	
+                	    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+                	    		if(!(tt instanceof Player)){
+                	    			tt.remove();	
+                	    		}
                 	    	}
     					}
     					//}
@@ -259,7 +270,22 @@ public class Main extends JavaPlugin implements Listener{
 			String arena = arenap.get(p);
 			final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
 			p.teleport(t);
-			arenap.remove(p);	
+			arenap.remove(p);
+			
+			getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
+	    	Sign s = this.getSignFromArena(arena);
+        	// no players in given arena anymore -> update sign
+	    	if(!arenap.values().contains(arena)){
+	    		s.setLine(2, "§2Join!");
+	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
+	    		s.update();
+	    		
+	    		for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+		    		if(!(tt instanceof Player)){
+		    			tt.remove();
+		    		}
+		    	}
+	    	}
 		}
 	}
 	
@@ -278,7 +304,24 @@ public class Main extends JavaPlugin implements Listener{
 	    	p2.updateInventory();
 	    	p2.getInventory().setContents(pinv.get(p2));
 	    	p2.getInventory().setArmorContents(parmor.get(p2));
-	    	p2.updateInventory();	
+	    	p2.updateInventory();
+	    	
+	    	p2.setLevel(xpp.get(p2));  
+	    	
+	    	getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
+	    	Sign s = this.getSignFromArena(arena);
+        	// no players in given arena anymore -> update sign
+	    	if(!arenap.values().contains(arena)){
+	    		s.setLine(2, "§2Join!");
+	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
+	    		s.update();
+	    		
+	    		for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+		    		if(!(tt instanceof Player)){
+		    			tt.remove();	
+		    		}
+		    	}
+	    	}
 		}
 		
 	}
@@ -305,26 +348,9 @@ public class Main extends JavaPlugin implements Listener{
 	            final Sign s = (Sign) event.getClickedBlock().getState();
                 if (s.getLine(0).equalsIgnoreCase("§2[witherfight]"))
                 {
-                	boolean update = true;
-                	for(Player p_ : arenap.keySet()){
-                		if(arenap.containsKey(p_)){
-                			update = false;
-                		}
-                	}
-                	if(update){
-            			s.setLine(2, "§2Join!");
-            			s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
-            			s.update();
-                	}
+                	
                 	
                 	String arena = s.getLine(1);
-                	getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
-                	// no players in given arena anymore -> update sign
-        	    	if(!arenap.values().contains(arena)){
-        	    		s.setLine(2, "§2Join!");
-        	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
-        	    		s.update();
-        	    	}
                 	
                 	if(s.getLine(2).equalsIgnoreCase("§2Join!")){
                     	arena = arena.substring(2);
@@ -333,6 +359,8 @@ public class Main extends JavaPlugin implements Listener{
                     	
                     	if(currentcount < getConfig().getInt("config.maxplayers") - 1){ // 3
                     		Player p2 = event.getPlayer();
+                    		xpp.put(p2, p2.getLevel());
+                    		getLogger().info(Float.toString(p2.getExp()));
                     		pinv.put(p2, p2.getInventory().getContents());
                     		parmor.put(p2, p2.getInventory().getArmorContents());
                     		p2.getInventory().clear();
@@ -361,10 +389,12 @@ public class Main extends JavaPlugin implements Listener{
     	                	final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".spawn.world")), getConfig().getDouble(arena + ".spawn.x"), getConfig().getDouble(arena + ".spawn.y"), getConfig().getDouble(arena + ".spawn.z"));
     	        			event.getPlayer().teleport(t);
     	        			
-    	        			s.setLine(3, Integer.toString(currentcount) + "/" + getConfig().getString("config.maxplayers"));
+    	        			s.setLine(3, Integer.toString(currentcount + 1) + "/" + getConfig().getString("config.maxplayers"));
     	        			s.update();
                     	}else{
                     		Player p2 = event.getPlayer();
+                    		xpp.put(p2, p2.getLevel());
+                    		getLogger().info(Float.toString(p2.getExp()));
                     		pinv.put(p2, p2.getInventory().getContents());
                     		parmor.put(p2, p2.getInventory().getArmorContents());
                     		p2.getInventory().clear();
@@ -390,7 +420,7 @@ public class Main extends JavaPlugin implements Listener{
                     		
                     		// start the game! spawn a wither and update the sign.
                     		s.setLine(2, "§4Ingame!");
-                    		s.setLine(3, Integer.toString(currentcount) + "/" + getConfig().getString("config.maxplayers"));
+                    		s.setLine(3, Integer.toString(currentcount + 1) + "/" + getConfig().getString("config.maxplayers"));
     	        			s.update();
                     		for(Player p_ : arenap.keySet()){
                     			if(arenap.get(p_).equalsIgnoreCase(arena)){
@@ -405,6 +435,26 @@ public class Main extends JavaPlugin implements Listener{
                     			sk.setSkeletonType(SkeletonType.WITHER);
                     		}
                     	}
+                    	
+                    	boolean update = true;
+                    	for(Player p_ : arenap.keySet()){
+                    		if(arenap.containsKey(p_)){
+                    			update = false;
+                    		}
+                    	}
+                    	if(update){
+                			s.setLine(2, "§2Join!");
+                			s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
+                			s.update();
+                    	}
+                    	
+                    	getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
+                    	// no players in given arena anymore -> update sign
+            	    	if(!arenap.values().contains(arena)){
+            	    		s.setLine(2, "§2Join!");
+            	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
+            	    		s.update();
+            	    	}
                 	}
                 }
 	        }
@@ -433,7 +483,7 @@ public class Main extends JavaPlugin implements Listener{
                                 //sender.sendMessage(String.format("You were given %s and now have %s", econ.format(r.amount), econ.format(r.balance)));
                             }
                     	}else{
-                    		getServer().dispatchCommand(getServer().getConsoleSender(), "enjin addpoints " + p.getName() + " 5");
+                    		getServer().dispatchCommand(getServer().getConsoleSender(), "enjin addpoints " + p.getName() + " 10");
                     	}
                     	String arena = arenap.get(p);
     					final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
@@ -447,6 +497,9 @@ public class Main extends JavaPlugin implements Listener{
             	    	p2.getInventory().setArmorContents(parmor.get(p2));
             	    	p2.updateInventory();
             			
+            	    	p2.setLevel(xpp.get(p2));
+            	    	getLogger().info(Float.toString(p2.getExp()));
+            	    	
             			for(Player p_ : arenap.keySet()){
             				if(arenap.get(p_).equalsIgnoreCase(arena)){
             					Location t_ = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
@@ -459,6 +512,11 @@ public class Main extends JavaPlugin implements Listener{
                     			p2_.getInventory().setContents(pinv.get(p2_));
                     			p2_.getInventory().setArmorContents(parmor.get(p2_));
                     			p2_.updateInventory();
+                    			
+                    			p2_.setLevel(xpp.get(p2_));
+                    			getLogger().info(Float.toString(p2_.getExp()));
+                    			
+                    			getServer().dispatchCommand(getServer().getConsoleSender(), "enjin addpoints " + p2_.getName() + " 10");
             				}
             			}
             			
