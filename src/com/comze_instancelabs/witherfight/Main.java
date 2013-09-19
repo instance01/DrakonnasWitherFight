@@ -63,9 +63,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 public class Main extends JavaPlugin implements Listener{
 	
-	//TODO: Bugs
-	// [High][Not Proved] People may be able to join while a game is running?
-	
 	public static Economy econ = null;
 	public boolean economy = false;
 	
@@ -431,7 +428,8 @@ public class Main extends JavaPlugin implements Listener{
                     		w.setMaxHealth(200D);
                     		w.setHealth(200D);
                     		for(int i = 0; i < 20; i++){
-                    			Skeleton sk = p.getWorld().spawn(new Location(Bukkit.getWorld(getConfig().getString(arena + ".spawn.world")), getConfig().getInt(arena + ".spawn.x"), getConfig().getInt(arena + ".spawn.y"), getConfig().getInt(arena + ".spawn.z")), Skeleton.class);	
+                    			// randomly spawn witherskeletons around playerspawn in range of 10 blocks
+                    			Skeleton sk = p.getWorld().spawn(new Location(Bukkit.getWorld(getConfig().getString(arena + ".spawn.world")), getConfig().getInt(arena + ".spawn.x") + (-10) + (int)(Math.random() * ((10 - (-10)) + 1)), getConfig().getInt(arena + ".spawn.y"), getConfig().getInt(arena + ".spawn.z") + (-10) + (int)(Math.random() * ((10 - (-10)) + 1))), Skeleton.class);	
                     			sk.setSkeletonType(SkeletonType.WITHER);
                     		}
                     	}
