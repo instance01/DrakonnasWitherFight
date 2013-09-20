@@ -82,10 +82,10 @@ public class Main extends JavaPlugin implements Listener{
 		
 		getConfig().addDefault("config.use_points", true);
 		getConfig().addDefault("config.use_economy", false);
+		getConfig().addDefault("config.enjinpoints", "10");
 		getConfig().addDefault("config.moneyreward_amount", 20.0);
 		getConfig().addDefault("config.itemid", 264);
 		getConfig().addDefault("config.itemamount", 1);
-		getConfig().addDefault("config.auto_updating", true);
 		getConfig().addDefault("config.cooldown", 24);
 		
 		getConfig().addDefault("config.maxplayers", 3);
@@ -377,7 +377,7 @@ public class Main extends JavaPlugin implements Listener{
     	                	arenap.put(event.getPlayer(), arena);
     	                	
     	                	p2.setAllowFlight(false);
-    	                	//p2.setGameMode(GameMode.SURVIVAL);
+    	                	p2.setGameMode(GameMode.SURVIVAL);
     	                	p2.setFlying(false);
     	                	p2.setHealth(20D);
     	                	
@@ -481,7 +481,7 @@ public class Main extends JavaPlugin implements Listener{
                                 //sender.sendMessage(String.format("You were given %s and now have %s", econ.format(r.amount), econ.format(r.balance)));
                             }
                     	}else{
-                    		getServer().dispatchCommand(getServer().getConsoleSender(), "enjin addpoints " + p.getName() + " 10");
+                    		getServer().dispatchCommand(getServer().getConsoleSender(), "enjin addpoints " + p.getName() + " " + getConfig().getString("enjinpoints"));
                     	}
                     	String arena = arenap.get(p);
     					final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
