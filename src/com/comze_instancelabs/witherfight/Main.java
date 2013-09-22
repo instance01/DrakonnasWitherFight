@@ -286,7 +286,52 @@ public class Main extends JavaPlugin implements Listener{
 		}
 	}
 	
+	
 	@EventHandler
+    public void onDamage(EntityDamageByEntityEvent e) {
+        Player p = (Player) e.getEntity();
+        if(p.getHealth() < 1) {
+            e.setCancelled(true);
+            p.setHealth(20F);
+            p.getActivePotionEffects().clear();
+            if(arenap.containsKey(p)){
+    			tpthem.put(p, arenap.get(p));
+    			String arena = arenap.get(p);
+    			final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
+    			p.teleport(t);
+    			arenap.remove(p);
+    			
+    			Player p2 = p;
+    			p2.getInventory().clear();
+    	    	p2.updateInventory();
+    	    	p2.getInventory().setContents(pinv.get(p2));
+    	    	p2.getInventory().setArmorContents(parmor.get(p2));
+    	    	p2.updateInventory();
+    	    	
+    	    	p2.setLevel(xpp.get(p2));  
+    	    	
+    	    	getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
+    	    	Sign s = this.getSignFromArena(arena);
+            	// no players in given arena anymore -> update sign
+    	    	if(!arenap.values().contains(arena)){
+    	    		s.setLine(2, "§2Join!");
+    	    		s.setLine(3, "0/" + Integer.toString(getConfig().getInt("config.maxplayers")));
+    	    		s.update();
+    	    		
+    	    		for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+    		    		if(!(tt instanceof Player)){
+    		    			tt.remove();	
+    		    		}
+    		    	}
+    	    	}
+    	    	
+    		}
+    		
+        }
+	 }
+	
+	
+	/*@EventHandler
     public void onPlayerDeath(PlayerDeathEvent event){
 		Player p = event.getEntity();
 		if(arenap.containsKey(p)){
@@ -319,9 +364,10 @@ public class Main extends JavaPlugin implements Listener{
 		    		}
 		    	}
 	    	}
+	    	
 		}
 		
-	}
+	}*/
 	
 	
 	@EventHandler
